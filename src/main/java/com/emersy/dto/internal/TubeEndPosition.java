@@ -8,5 +8,5 @@ import lombok.Data;
 public class TubeEndPosition {
     private double latitude;
     private double longitude;
-    private double elevation;
+    private double elevationDelta;
 }

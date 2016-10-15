@@ -47,7 +47,7 @@ public class TubeEndsCalculator {
     }
 
     private List<TubeEndPosition> interpolateTubeJoints(PolynomialSplineFunction latitudeInterpolator, PolynomialSplineFunction longitudeInterpolator, int tubeLength, double totalDistance) throws Exception {
-        ArrayList<TubeEndPosition> tubeJointPositions = new ArrayList<>(latitudeInterpolator.getKnots().length);
+        ArrayList<TubeEndPosition> tubeJointPositions = new ArrayList<>();
         double distanceBetweenTheCurrentJointAndBeginning = 0;
         while (distanceBetweenTheCurrentJointAndBeginning <= totalDistance) {
             double currJointLat = latitudeInterpolator.value(distanceBetweenTheCurrentJointAndBeginning);
