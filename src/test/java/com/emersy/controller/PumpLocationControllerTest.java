@@ -1,5 +1,6 @@
 package com.emersy.controller;
 
+import com.emersy.dto.PumpFinalTrack;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,12 +23,12 @@ public class PumpLocationControllerTest {
 
 
     @Test
-    public void exampleTest() throws IOException {
+    public void pumpLocationTest() throws IOException {
         String postContent =
-                IOUtils.toString(resourceLoader.getResource("classpath:com/emersy/controller/tubeLocations.json")
+                IOUtils.toString(resourceLoader.getResource("classpath:com/emersy/controller/tubeTrack.json")
                         .getInputStream(), "UTF-8");
 
-//        String body = this.restTemplate.postForEntity("/tube/location", String.class);
-//        assertThat(body).isEqualTo("Hello World");
+        PumpFinalTrack pumpFinalTrack = this.restTemplate.postForObject("/pumpLocation", postContent, PumpFinalTrack.class);
+
     }
 }

@@ -15,10 +15,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @JsonTest
-public class PumpTrackSerializationTest {
+public class TubeTrackSerializationTest {
 
     @Autowired
-    private JacksonTester<PumpTrack> json;
+    private JacksonTester<TubeTrack> json;
     @Autowired
     private ResourceLoader resourceLoader;
 
@@ -26,20 +26,22 @@ public class PumpTrackSerializationTest {
     @Test
     public void testDeserialize() throws Exception {
         String content=
-                IOUtils.toString(resourceLoader.getResource("classpath:com/emersy/controller/tubeLocations.json")
+                IOUtils.toString(resourceLoader.getResource("classpath:com/emersy/controller/tubeTrack.json")
                         .getInputStream(), "UTF-8");
 
-        PumpTrack pumpTrack = new PumpTrack();
-        pumpTrack.setPoints(Arrays.asList(
-                new Point(46.49272999999999, 11.321550000000002),
+        TubeTrack tubeTrack = new TubeTrack();
+        tubeTrack.setHydrant(new Point(46.49272999999999, 11.321550000000002));
+        tubeTrack.setFire(new Point(46.4925854984408, 11.32392168045044));
+        tubeTrack.setPoints(Arrays.asList(
                 new Point(46.49241506053793, 11.321745067834854),
                 new Point(46.492422446811005, 11.322176903486252),
-                new Point(46.49249686336335, 11.322709321975708),
-                new Point(46.4925854984408, 11.32392168045044)
+                new Point(46.49249686336335, 11.322709321975708)
         ));
+        tubeTrack.setPa(8);
+        tubeTrack.setFlowRate(800);
 
         assertThat(this.json.parse(content))
-                .isEqualTo(pumpTrack);
+                .isEqualTo(tubeTrack);
     }
 
 }

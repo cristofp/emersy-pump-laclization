@@ -1,5 +1,8 @@
 package com.emersy.controller;
 
+import com.emersy.dto.PumpFinalTrack;
+import com.emersy.dto.TubeTrack;
+import com.emersy.service.PumpLocatingService;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.ElevationApi;
 import com.google.maps.GeoApiContext;
@@ -7,6 +10,8 @@ import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.ElevationResult;
 import com.google.maps.model.LatLng;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +20,7 @@ public class TestController {
 
     private GeoApiContext context = new GeoApiContext().setApiKey("AIzaSyDx07hBuVcSZRnSXnSSvmLBYXpAk0huSEI");
 
+    @Autowired private PumpLocatingService pumpLocatingService;
 
 
     @RequestMapping("/elevationTest")
@@ -37,5 +43,9 @@ public class TestController {
         return "Distance Bolzano-Trento: " + element.distance + ", duration: " + element.duration;
     }
 
-
+    @RequestMapping("/pumpLocation")
+    public PumpFinalTrack pumpLocation(@RequestBody TubeTrack tubeTrack){
+        //delegate all the job to Service
+        return pumpLocatingService.locatePumps(tubeTrack);
+    }
 }
