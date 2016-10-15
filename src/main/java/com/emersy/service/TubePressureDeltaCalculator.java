@@ -17,10 +17,11 @@ public class TubePressureDeltaCalculator {
         tubeJointPositionWithPressureDeltas.add(new TubeJointPositionWithPressureDelta(tubeJointPositions.get(0), 0));
 
         for(int i=1; i< tubeJointPositions.size(); i++){
-            //add delta according to elevation
+            //add delta according to elevationDelta
             double pressureElevationLoss = tubeJointPositions.get(i).getElevationDelta()/10.;
             //add delta according to length and watefFlow
-            double pressureTubeLoss = 7.8125e-13*Math.pow(flowRate,4-2.2569e-9)*Math.pow(flowRate,3+2.4896e-6)*Math.pow(flowRate,2-7.6270e-4)*flowRate+9e-2;
+            double pressureTubeLoss =
+                    7.8125e-13 * Math.pow(flowRate,4) - 2.2569e-9 * Math.pow(flowRate,3) + 2.4896e-6 * Math.pow(flowRate,2) - 7.6270e-4 * flowRate + 9e-2;
             double currentPressureLossToPrevious = pressureElevationLoss + pressureTubeLoss;
             double previousPressureLossToStart = tubeJointPositionWithPressureDeltas.get(i-1)
                     .getPressureDeltaToPrevious(); // todo to be deleted

@@ -17,8 +17,10 @@ public class PumpLocatingService {
     @Autowired private PumpPositionsCalculator pumpPositionsCalculator;
 
     public PumpFinalTrack locatePumps(TubeTrack tubeTrack) throws Exception {
-        //count the tube ends points (lat, lng, elv)
-        List<TubeEndPosition> tubeEndPositions = tubeEndsCalculator.calculateTubeJointPoints(tubeTrack.getPointsIncludingHydrantAndFire());
+        //compute the tube ends points (lat, lng, elv)
+        List<TubeEndPosition> tubeEndPositions =
+                tubeEndsCalculator.calculateTubeJointPoints(tubeTrack.getPointsIncludingHydrantAndFire());
+
         //add the pressure loss to each point
         List<TubeJointPositionWithPressureDelta> tubeJointPositionWithPressureDeltas = tubePressureDeltaCalculator.calculatePressureDelta(tubeEndPositions, tubeTrack.getFlowRate());
 

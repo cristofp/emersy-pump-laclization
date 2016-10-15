@@ -20,19 +20,24 @@ public class PumpPositionsCalculator {
         pumpFinalTrack.setHydrant(new Point(hydrant.getLatitude(), hydrant.getLongitude()));
         List<PumpPosition> finalPumps = new ArrayList<>();
 
-        double currentPressure = pumpPressure;
+        double currentPressure = 0;
         int tubesBefore = 0;
         for(int i=1; i<tubeJointPositionWithPressureDeltas.size(); i++){
             TubeJointPositionWithPressureDelta currentTubeEnd = tubeJointPositionWithPressureDeltas.get(i);
             currentPressure += currentTubeEnd.getPressureDeltaToPrevious();
             tubesBefore++;
-            if(currentPressure < 2.0){
+            if(currentPressure < 2.0 || theNextTubeWillCauseTooLitlePressure(tubeJointPositionWithPressureDeltas, i, currentPressure)){
+                finalPumps.add(new PumpPosition(currentTubeEnd.getLatitude(), currentTubeEnd.getLongitude(), currentTubeEnd.getElevationDelta(), currentPressure, tubesBefore));
                 currentPressure = pumpPressure;
-                finalPumps.add(new PumpPosition(currentTubeEnd.getLatitude(), currentTubeEnd.getLongitude(), currentTubeEnd.getElevation(), currentPressure, tubesBefore));
                 tubesBefore = 0;
             }
         }
         pumpFinalTrack.setPumps(finalPumps);
         return pumpFinalTrack;
+    }
+
+    private boolean theNextTubeWillCauseTooLitlePressure(List<TubeJointPositionWithPressureDelta> tubeJointPositionWithPressureDeltas, int i, double currentPressure) {
+        return i+1 < tubeJointPositionWithPressureDeltas.size()
+                && currentPressure + tubeJointPositionWithPressureDeltas.get(i+1).getPressureDeltaToPrevious() < 1.0;
     }
 }
