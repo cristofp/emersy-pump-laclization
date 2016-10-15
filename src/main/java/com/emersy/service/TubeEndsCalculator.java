@@ -1,8 +1,9 @@
 package com.emersy.service;
 
 import com.emersy.dto.Point;
-import com.emersy.dto.TubeTrack;
 import com.emersy.dto.internal.TubeEndPosition;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,52 +16,48 @@ public class TubeEndsCalculator {
     @Autowired
     GoogleMapsApiConnector googleMapsApiConnector;
 
-    public List<TubeEndPosition> calculateTubePoints(TubeTrack tubeTrack) throws Exception {
-//        long distance = 0;
-//        ArrayList<TubePathPointsRelativePosition> latitudes = new ArrayList<>();
-//        ArrayList<TubePathPointsRelativePosition> longitudes = new ArrayList<>();
-//        for (int i = 0; i < tubeTrack.getPoints().size(); i++) {
-//            Point tubeTrackPoint = tubeTrack.getPoints().get(i);
-//            latitudes.add(new TubePathPointsRelativePosition(tubeTrackPoint.getLat(), distance));
-//            longitudes.add(new TubePathPointsRelativePosition(tubeTrackPoint.getLng(), distance));
-//
-//            if(i+1 < tubeTrack.getPoints().size()){
-//                distance += googleMapsApiConnector.getDistanceBetween(tubeTrackPoint.getLat(), tubeTrackPoint.getLng(),
-//                        tubeTrack.getPoints().get(i+1).getLat(), tubeTrack.getPoints().get(i+1).getLng());
-//            }
-//        }
-        //remove what's above
-        ArrayList<Double> distancesBetweenPathPoints = new ArrayList<>();
-        ArrayList<Double> latitudess = new ArrayList<>();
-        ArrayList<Double> longitudess = new ArrayList<>();
+    static public int tubeLength = 20;
 
-        distancesBetweenPathPoints.add(0.);
-        latitudess.add(tubeTrack.getPoints().get(0).getLat());
-        longitudess.add(tubeTrack.getPoints().get(0).getLng());
+    public List<TubeEndPosition> calculateTubeJointPoints(List<Point> tubeJointPoints) throws Exception {
+        
+        double[] distancesToStartPoint = new double[tubeJointPoints.size()];
+        double[] latitudes = new double[tubeJointPoints.size()];
+        double[] longitudes = new double[tubeJointPoints.size()];
 
-        for (int i = 1; i < tubeTrack.getPoints().size(); i++) {
-            Point previousPoint = tubeTrack.getPoints().get(i - 1);
-            Point currentPoint = tubeTrack.getPoints().get(i);
-            long distanceToPrevious =
+        distancesToStartPoint[0] = 0;
+        latitudes[0] = tubeJointPoints.get(0).getLat();
+        longitudes[0] = tubeJointPoints.get(0).getLng();
+
+        for (int i = 1; i < tubeJointPoints.size(); i++) {
+            Point previousPoint = tubeJointPoints.get(i - 1);
+            Point currentPoint = tubeJointPoints.get(i);
+            long distanceToPreviousPoint =
                     googleMapsApiConnector.getDistanceBetween(previousPoint.getLat(), previousPoint.getLng(),
                             currentPoint.getLat(), currentPoint.getLng());
-            distancesBetweenPathPoints.add((double) distanceToPrevious);
+            distancesToStartPoint[i] = distancesToStartPoint[i - 1] + distanceToPreviousPoint;
 
-            latitudess.add(currentPoint.getLat());
-            longitudess.add(currentPoint.getLng());
+            latitudes[i] = currentPoint.getLat();
+            longitudes[i] = currentPoint.getLng();
         }
+        PolynomialSplineFunction latitudeInterpolator = new LinearInterpolator().interpolate(distancesToStartPoint, latitudes);
+        PolynomialSplineFunction longitudeInterpolator = new LinearInterpolator().interpolate(distancesToStartPoint, longitudes);
+        double totalDistance = distancesToStartPoint[distancesToStartPoint.length - 1];
 
-        Double[] distances = distancesBetweenPathPoints.toArray(new Double[distancesBetweenPathPoints.size()]);
-        Double[] lititudes = latitudess.toArray(new Double[latitudess.size()]);
-
-
-//        new LinearInterpolator().interpolate(
-//                distances,
-//                lititudes
-//
-//        );
-        return null;
+        return interpolateTubeJoints(latitudeInterpolator, longitudeInterpolator, tubeLength, totalDistance);
     }
 
+    private List<TubeEndPosition> interpolateTubeJoints(PolynomialSplineFunction latitudeInterpolator, PolynomialSplineFunction longitudeInterpolator, int tubeLength, double totalDistance) throws Exception {
+        ArrayList<TubeEndPosition> tubeJointPositions = new ArrayList<>(latitudeInterpolator.getKnots().length);
+        double distanceBetweenTheCurrentJointAndBeginning = 0;
+        while (distanceBetweenTheCurrentJointAndBeginning <= totalDistance) {
+            double currJointLat = latitudeInterpolator.value(distanceBetweenTheCurrentJointAndBeginning);
+            double currJointLng = longitudeInterpolator.value(distanceBetweenTheCurrentJointAndBeginning);
 
+            tubeJointPositions.add(new TubeEndPosition(
+                    currJointLat, currJointLng, googleMapsApiConnector.getElevation(currJointLat, currJointLng))
+            );
+            distanceBetweenTheCurrentJointAndBeginning += tubeLength;
+        }
+        return tubeJointPositions;
+    }
 }

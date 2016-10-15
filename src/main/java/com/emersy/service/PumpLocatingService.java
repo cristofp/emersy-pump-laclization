@@ -9,9 +9,9 @@ public class PumpLocatingService {
 
     private TubeEndsCalculator tubeEndsCalculator;
 
-    public PumpFinalTrack locatePumps(TubeTrack tubeTrack) {
+    public PumpFinalTrack locatePumps(TubeTrack tubeTrack) throws Exception {
         //count the tube ends points (lat, lng, elv)
-//        tubeEndsCalculator.calculateTubePoints(tubeTrack);
+        tubeEndsCalculator.calculateTubeJointPoints(tubeTrack.getPointsIncludingHydrantAndFire());
         //add the pressure loss to each point
         //calculate the pump possitions
     return null;
